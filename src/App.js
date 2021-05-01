@@ -2,7 +2,7 @@ import { useState } from "react";
 import ChipsInput from "./components/ChipsInput/ChipsInput";
 
 function App() {
-  const [value, setValue] = useState("1,2,3,4,5");
+  const [value, setValue] = useState();
   debugger;
   return (
     <div className="App">
