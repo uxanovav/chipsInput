@@ -7,9 +7,9 @@ const ChipsInput = ({ value, onChange }) => {
 
   let currentValue = "";
 
-  const currentChipsState = value.split(",").map((chipsElement, idx) => {
+  let currentChipsState = value.split(",").map((chipsElement) => {
     return {
-      id: idx,
+      id: Math.floor(Math.random() * 1000),
       value: chipsElement,
     };
   });
@@ -23,16 +23,32 @@ const ChipsInput = ({ value, onChange }) => {
     return resultValue;
   };
 
+  const onDelete = (id) => {
+    currentChipsState = currentChipsState.filter((chipsElement) => {
+      return chipsElement.id !== id;
+    });
+    onChange(combineResult());
+  };
+
   const onUpdate = (newValue) => {
     debugger;
+    if (newValue === ",") {
+      inputPanel.current.value = "";
+      return null;
+    }
     currentValue = newValue;
     if (currentValue.includes(",")) {
-      currentChipsState.push({
-        id: currentChipsState.length,
-        value: currentValue.slice(0, -1),
-      });
-      onChange(combineResult());
-      inputPanel.current.value = "";
+      if ((newValue.split('"').length - 1) % 2 !== 0) {
+        alert("Закройте кавычки");
+        inputPanel.current.value = inputPanel.current.value.slice(0, -1);
+      } else {
+        currentChipsState.push({
+          id: currentChipsState.length,
+          value: currentValue.slice(0, -1),
+        });
+        onChange(combineResult());
+        inputPanel.current.value = "";
+      }
     }
   };
 
@@ -49,6 +65,7 @@ const ChipsInput = ({ value, onChange }) => {
               value={chipsElement.value}
               id={chipsElement.id}
               key={chipsElement.id}
+              onDelete={onDelete}
             />
           );
         })}
@@ -58,6 +75,7 @@ const ChipsInput = ({ value, onChange }) => {
             onChange={(e) => {
               onUpdate(e.target.value);
             }}
+            placeholder="Введите ключевые слова"
           ></input>
           <span>{currentValue}</span>
         </label>
