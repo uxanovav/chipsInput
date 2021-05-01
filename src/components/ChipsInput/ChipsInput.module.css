@@ -1,0 +1,26 @@
+.chips {
+  height: 20px;
+  width: fit-content;
+  background-color: rgb(109, 109, 243);
+  color: rgb(255, 255, 255);
+  border-radius: 3px;
+  padding: 5px;
+  margin: 2px;
+}
+
+.chips:hover {
+  background-color: rgb(54, 54, 170);
+}
+
+.chips_input {
+  display: flex;
+  border: grey 1px solid;
+}
+
+.chips_input input {
+  width: 100%;
+  height: 25px;
+  margin: 2px;
+  border: none;
+  outline: none;
+}
