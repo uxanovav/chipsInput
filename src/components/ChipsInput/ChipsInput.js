@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Chips from "./Chips/Chips";
 import styles from "./ChipsInput.module.css";
-// import { CSSTransition } from "react-transition-group";
 
 const ChipsInput = ({ value, onChange }) => {
   const [alertFlag, changeAlertFlag] = useState(false);
-  const inputPanel = React.createRef();
+  const [currentText, setCurrentText] = useState("");
+  useEffect(() => {
+    onUpdate(currentText);
+    document.addEventListener("keydown", bckSpace, false);
+  });
+
   const regexp = /,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/;
   let currentChipsState = value
     ? value.split(regexp).map((chipsElement) => {
@@ -17,12 +21,14 @@ const ChipsInput = ({ value, onChange }) => {
     : [];
 
   const combineResult = () => {
-    let resultValue = currentChipsState
-      .map((el) => {
-        return el.value;
-      })
-      .join();
-    return resultValue;
+    if (currentChipsState) {
+      let resultValue = currentChipsState
+        .map((el) => {
+          return el.value;
+        })
+        .join();
+      return resultValue;
+    }
   };
 
   const onDelete = (id) => {
@@ -30,6 +36,14 @@ const ChipsInput = ({ value, onChange }) => {
       return chipsElement.id !== id;
     });
     onChange(combineResult());
+  };
+
+  const bckSpace = (event) => {
+    debugger;
+    if (event.key === "Backspace" && currentText === "1") {
+      currentChipsState.pop();
+      onChange(combineResult());
+    }
   };
 
   const onChangeChipsValue = (id, value) => {
@@ -42,8 +56,9 @@ const ChipsInput = ({ value, onChange }) => {
   };
 
   const onUpdate = (newValue) => {
+    console.log(currentText);
     if (newValue === ",") {
-      inputPanel.current.value = "";
+      setCurrentText("");
       return null;
     }
     if (newValue[newValue.length - 1] === '"' && alertFlag === true) {
@@ -58,7 +73,7 @@ const ChipsInput = ({ value, onChange }) => {
           value: newValue.slice(0, newValue.length - 1),
         });
         onChange(combineResult());
-        inputPanel.current.value = "";
+        setCurrentText("");
         changeAlertFlag(false);
       }
     }
@@ -86,9 +101,9 @@ const ChipsInput = ({ value, onChange }) => {
           : null}
         <label>
           <input
-            ref={inputPanel}
+            value={currentText}
             onChange={(e) => {
-              onUpdate(e.target.value);
+              setCurrentText(e.target.value);
             }}
             onBlur={(e) => {
               onUpdate(e.target.value + ",");
