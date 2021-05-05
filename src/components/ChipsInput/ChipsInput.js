@@ -4,13 +4,11 @@ import styles from "./ChipsInput.module.css";
 // import { CSSTransition } from "react-transition-group";
 
 const ChipsInput = ({ value, onChange }) => {
-  const inputPanel = React.createRef();
-
   const [alertFlag, changeAlertFlag] = useState(false);
-
-  let currentValue = "";
+  const inputPanel = React.createRef();
+  const regexp = /,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/;
   let currentChipsState = value
-    ? value.split(",").map((chipsElement) => {
+    ? value.split(regexp).map((chipsElement) => {
         return {
           id: Math.floor(Math.random() * 1000),
           value: chipsElement,
@@ -33,6 +31,7 @@ const ChipsInput = ({ value, onChange }) => {
     });
     onChange(combineResult());
   };
+
   const onChangeChipsValue = (id, value) => {
     currentChipsState = currentChipsState.map((chipsElement) => {
       return chipsElement.id === id
@@ -43,24 +42,21 @@ const ChipsInput = ({ value, onChange }) => {
   };
 
   const onUpdate = (newValue) => {
-    debugger;
     if (newValue === ",") {
       inputPanel.current.value = "";
       return null;
     }
-    currentValue = newValue;
-    if (currentValue[currentValue.length - 1] === '"' && alertFlag === true) {
+    if (newValue[newValue.length - 1] === '"' && alertFlag === true) {
       changeAlertFlag(false);
     }
-    if (currentValue[currentValue.length - 1] === ",") {
+    if (newValue[newValue.length - 1] === ",") {
       if ((newValue.split('"').length - 1) % 2 !== 0) {
         changeAlertFlag(true);
       } else {
         currentChipsState.push({
-          id: currentChipsState.length,
-          value: currentValue.slice(0, -1),
+          id: Math.floor(Math.random() * 1000),
+          value: newValue.slice(0, newValue.length - 1),
         });
-        debugger;
         onChange(combineResult());
         inputPanel.current.value = "";
         changeAlertFlag(false);
@@ -70,13 +66,12 @@ const ChipsInput = ({ value, onChange }) => {
 
   return (
     <>
-      <div>
-        <span>Current Root Value: </span>
-        {value}
-      </div>
       <div className={styles.chips_input}>
         {value
           ? currentChipsState.map((chipsElement) => {
+              if (chipsElement.value === "") {
+                return null;
+              }
               return (
                 <Chips
                   value={chipsElement.value}
@@ -95,14 +90,16 @@ const ChipsInput = ({ value, onChange }) => {
             onChange={(e) => {
               onUpdate(e.target.value);
             }}
+            onBlur={(e) => {
+              onUpdate(e.target.value + ",");
+            }}
             placeholder={value ? "" : "Введите ключевые слова"}
           ></input>
-          <span>{currentValue}</span>
         </label>
       </div>
-      {alertFlag ? (
-        <span className={styles.alert}>Закройте кавычки с двух сторон</span>
-      ) : null}
+      <span className={styles.alert}>
+        {alertFlag && "Закройте кавычки с двух сторон"}
+      </span>
     </>
   );
 };
