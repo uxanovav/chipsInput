@@ -7,6 +7,7 @@
   padding: 0 5px 5px 5px;
   margin: 2px;
   cursor: pointer;
+  user-select: none;
 }
 
 .chips:hover {
@@ -36,4 +37,17 @@
 
 .alert {
   color: rgb(228, 76, 76);
+}
+
+.selected {
+  height: 15px;
+  width: fit-content;
+  background-color: rgb(39, 81, 110);
+  color: rgb(250, 252, 245);
+  border: rgb(217, 217, 255) 2px dotted;
+  border-radius: 5px;
+  padding: 0 5px 5px 5px;
+  margin: 2px;
+  cursor: pointer;
+  user-select: none;
 }

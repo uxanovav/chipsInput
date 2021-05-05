@@ -7,18 +7,25 @@ const ChipsInput = ({ value, onChange }) => {
   const [currentText, setCurrentText] = useState("");
   useEffect(() => {
     onUpdate(currentText);
-    document.addEventListener("keydown", bckSpace, false);
   });
-
   const regexp = /,(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))/;
+
+  //Нарезаем строку в массив объектов для "чипсов"
+
   let currentChipsState = value
     ? value.split(regexp).map((chipsElement) => {
         return {
-          id: Math.floor(Math.random() * 1000),
+          id: Math.floor(Math.random() * 10000),
           value: chipsElement,
         };
       })
     : [];
+
+  // Инициализируем массив выбранных "чипсов"
+
+  let selectedChips = [];
+
+  //Склеиваем массив объектов в строку для передачи родительскому компоненту
 
   const combineResult = () => {
     if (currentChipsState) {
@@ -31,6 +38,8 @@ const ChipsInput = ({ value, onChange }) => {
     }
   };
 
+  // Функция удаления по щелчку на "Х"
+
   const onDelete = (id) => {
     currentChipsState = currentChipsState.filter((chipsElement) => {
       return chipsElement.id !== id;
@@ -38,13 +47,35 @@ const ChipsInput = ({ value, onChange }) => {
     onChange(combineResult());
   };
 
-  const bckSpace = (event) => {
-    debugger;
-    if (event.key === "Backspace" && currentText === "1") {
-      currentChipsState.pop();
-      onChange(combineResult());
+  // Функция удаления по нажатию на клавиши "BackSpace/Delete"
+
+  const onDeleteKeyDown = (event) => {
+    if (
+      (event.key === "Backspace" || event.key === "Delete") &&
+      currentText === ""
+    ) {
+      if (selectedChips.length !== 0) {
+        for (let i = 0; i < selectedChips.length; i++) {
+          currentChipsState = currentChipsState.filter((chipsElement) => {
+            return chipsElement.id !== selectedChips[i];
+          });
+          onChange(combineResult());
+        }
+        selectedChips = [];
+      } else {
+        currentChipsState.pop();
+        onChange(combineResult());
+      }
     }
   };
+
+  //Функция добавления в массив выбранных "чипсов"
+
+  const onAddToSelected = (id) => {
+    return !selectedChips.includes(id) ? selectedChips.push(id) : null;
+  };
+
+  //Функция редактирования "чипса" при нажатии на элемент
 
   const onChangeChipsValue = (id, value) => {
     currentChipsState = currentChipsState.map((chipsElement) => {
@@ -55,22 +86,24 @@ const ChipsInput = ({ value, onChange }) => {
     onChange(combineResult());
   };
 
+  //Функция считывания событий в "input" элементе
+
   const onUpdate = (newValue) => {
-    console.log(currentText);
     if (newValue === ",") {
       setCurrentText("");
       return null;
     }
-    if (newValue[newValue.length - 1] === '"' && alertFlag === true) {
+    setCurrentText(newValue);
+    if (currentText[currentText.length - 1] === '"' && alertFlag === true) {
       changeAlertFlag(false);
     }
-    if (newValue[newValue.length - 1] === ",") {
-      if ((newValue.split('"').length - 1) % 2 !== 0) {
+    if (currentText[currentText.length - 1] === ",") {
+      if ((currentText.split('"').length - 1) % 2 !== 0) {
         changeAlertFlag(true);
       } else {
         currentChipsState.push({
           id: Math.floor(Math.random() * 1000),
-          value: newValue.slice(0, newValue.length - 1),
+          value: currentText.slice(0, currentText.length - 1),
         });
         onChange(combineResult());
         setCurrentText("");
@@ -91,10 +124,10 @@ const ChipsInput = ({ value, onChange }) => {
                 <Chips
                   value={chipsElement.value}
                   id={chipsElement.id}
-                  changeFlag={chipsElement.changeFlag}
                   key={chipsElement.id}
                   onChangeChipsValue={onChangeChipsValue}
                   onDelete={onDelete}
+                  onAddToSelected={onAddToSelected}
                 />
               );
             })
@@ -104,6 +137,9 @@ const ChipsInput = ({ value, onChange }) => {
             value={currentText}
             onChange={(e) => {
               setCurrentText(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              onDeleteKeyDown(e);
             }}
             onBlur={(e) => {
               onUpdate(e.target.value + ",");
